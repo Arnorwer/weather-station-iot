@@ -21,5 +21,3 @@ Cómo usar (resumen rápido):
 2. Iniciar backend: uvicorn backend.server:app --reload
 3. Ejecutar el lector serial (si Arduino conectado): python backend/serial_reader.py
 4. Abrir frontend/index.html en el navegador o servirlo con un servidor estático.
-
-Licencia: MIT (se puede añadir LICENSE si se desea)
