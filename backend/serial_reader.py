@@ -4,7 +4,7 @@ import json
 import csv
 from datetime import datetime
 import os
-from ring_buffer import RingBuffer
+from ring_buffer import RingBuffer, TwoDayStore
 
 def port_selector():
     ports = list(serial.tools.list_ports.comports())
@@ -59,16 +59,21 @@ def csv_save(data, file='data/sensor_data.csv'):
         writer.writerow(data)
 
 def main():
-    buffer_size = input("Ingrese el tamaño del buffer circular (número de lecturas a mantener en memoria): ").strip()
-    try:
-        buffer_size = int(buffer_size)
-        if buffer_size <= 0:
-            raise ValueError
-    except ValueError:
-        print("Tamaño de bufer invalido. Ingrese un número entero positivo.")
-        return
+    print("=== Lector de Datos del Sensor Meteorologico ===\n")
+    buffer = input("Indique si desea cambiar la capacidad del buffer circular (1440 por defecto) (s/n): ").strip().lower()
+    if buffer != 's':
+        buffer_size = 1440
+    else:
+        buffer_size = input("Ingrese la capacidad del buffer circular (número de lecturas a mantener en memoria): ").strip()
+        try:
+            buffer_size = int(buffer_size)
+            if buffer_size <= 0:
+                raise ValueError
+        except ValueError:
+            print("Tamaño de bufer invalido. Ingrese un número entero positivo.")
+            return
     
-    buffer_sensors = RingBuffer(capacity=buffer_size)
+    buffer_sensors = TwoDayStore(capacity_day=buffer_size)
     
     port_sel = port_selector()
     if not port_sel:
@@ -93,7 +98,7 @@ def main():
                         
                         data_sensor = json.loads(line)
                         data_sensor['timestamp'] = datetime.now().isoformat()
-                        buffer_sensors.append(data_sensor)
+                        buffer_sensors.add_reading(data_sensor)
                         
                         # Mostrar en consola
                         counter += 1
