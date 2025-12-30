@@ -4,7 +4,6 @@ import json
 import csv
 from datetime import datetime
 import os
-from ring_buffer import RingBuffer, TwoDayStore
 
 def port_selector():
     ports = list(serial.tools.list_ports.comports())
@@ -47,6 +46,7 @@ def json_save(data, file='data/sensor_data.json'):
     records.append(data)
     with open(file, 'w', encoding='utf-8') as f:
         json.dump(records, f, indent=2, ensure_ascii=False)
+        
 def csv_save(data, file='data/sensor_data.csv'):
     os.makedirs(os.path.dirname(file), exist_ok=True)
     existe = os.path.exists(file)
@@ -58,37 +58,13 @@ def csv_save(data, file='data/sensor_data.csv'):
         
         writer.writerow(data)
 
-def main():
-    print("=== Lector de Datos del Sensor Meteorologico ===\n")
-    buffer = input("Indique si desea cambiar la capacidad del buffer circular (1440 por defecto) (s/n): ").strip().lower()
-    if buffer != 's':
-        buffer_size = 1440
-    else:
-        buffer_size = input("Ingrese la capacidad del buffer circular (número de lecturas a mantener en memoria): ").strip()
-        try:
-            buffer_size = int(buffer_size)
-            if buffer_size <= 0:
-                raise ValueError
-        except ValueError:
-            print("Tamaño de bufer invalido. Ingrese un número entero positivo.")
-            return
-    
-    buffer_sensors = TwoDayStore(capacity_day=buffer_size)
-    
-    port_sel = port_selector()
-    if not port_sel:
-        return
-    
-    formato = format_selector()
-    print(f"\nConectando a {port_sel}...")
-    
+def read_from_serial(buffer_sensors, port_sel, formato):
+    counter = 0
     try:
         with serial.Serial(port_sel, 9600, timeout=1) as ser:
             print(f"✓ Conectado a {port_sel}")
             print("Leyendo datos (Ctrl+C para detener)...\n")
             print("="*60)
-            
-            counter = 0
             while True:
                 if ser.in_waiting:
                     try:
@@ -124,6 +100,4 @@ def main():
     except KeyboardInterrupt:
         print("\n\n✓ Lectura detenida por el usuario.")
         print(f"Total de registros guardados: {counter}")
-
-if __name__ == "__main__":
-    main()
+        

@@ -73,7 +73,7 @@ class TwoDayStore:
 
     def snapshot_today(self):
         today = self.today_date()
-        return self._by_day.get(today, RingBuffer(self._maxlen_per_day)).snapshot()
+        return self._buffer_per_day.get(today, RingBuffer(self._capacity_day)).snapshot()
 
     def yesterday_date(self):
         today = self.today_date()
@@ -81,4 +81,5 @@ class TwoDayStore:
 
     def snapshot_yesterday(self):
         yesterday = self.yesterday_date()
-        return self._by_day.get(yesterday, RingBuffer(self._maxlen_per_day)).snapshot()
+        return self._buffer_per_day.get(yesterday, RingBuffer(self._capacity_day)).snapshot()
+    
