@@ -3,7 +3,7 @@
 Proyecto: Estación meteorológica con microcontroladores y dashboard interactivo.
 
 Integrantes:
-- Esteban Avila (Líder)
+- Esteban Avila
 - Moises Araujo
 - Luis de Faria
 
