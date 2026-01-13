@@ -1,4 +1,4 @@
-from serial_reader import read_from_serial, port_selector, format_selector
+from serial_reader import read_from_serial, port_selector
 from ring_buffer import RingBuffer
 
 def main():
@@ -23,11 +23,8 @@ def main():
     if not port_sel:
         return
     
-    # Seleccionar formato de salida
-    formato = format_selector()
-    
     # Ejecutar el lector serial
-    read_from_serial(buffer_sensors, port_sel, formato)
+    read_from_serial(buffer_sensors, port_sel)
 
 if __name__ == "__main__":
     main()
