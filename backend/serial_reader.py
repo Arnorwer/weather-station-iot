@@ -2,6 +2,7 @@ import serial
 import serial.tools.list_ports
 import json
 from datetime import datetime
+import threading
 
 def port_selector():
     ports = list(serial.tools.list_ports.comports())
@@ -56,4 +57,46 @@ def read_from_serial(buffer_sensors, port_sel):
     except KeyboardInterrupt:
         print("\n\n✓ Lectura detenida por el usuario.")
         #print(f"Total de registros guardados: {counter}")
+
+def read_from_serial_loop(buffer_sensors, port_sel, stop_event):
+    try:
+        with serial.Serial(port_sel, 9600, timeout=0.5) as ser:
+            print(f"✓ Lector serial iniciado en thread background\n")
+            
+            while not stop_event.is_set():
+                try:
+                    if ser.in_waiting:
+                        line = ser.readline().decode('utf-8', errors='replace').strip()
+                        
+                        if not line or not line.startswith('{'):
+                            continue
+                        
+                        data_sensor = json.loads(line)
+                        data_sensor['timestamp'] = datetime.now().isoformat()
+                        buffer_sensors.append(data_sensor)
+                        
+                    else:
+                        # No hay datos, esperar brevemente (permite detención limpia)
+                        stop_event.wait(0.05)
+                
+                except Exception as e:
+                    print(f"⚠ Error procesando dato: {e}")
+                    continue
+    
+    except serial.SerialException as e:
+        print(f"✗ Error puerto serial: {e}")
+
+def start_serial_thread(buffer_sensors, port_sel):
+    stop_event = threading.Event()
+    
+    thread = threading.Thread(
+        target=read_from_serial_loop,
+        args=(buffer_sensors, port_sel, stop_event),
+        daemon=True
+    )
+    
+    thread.start()
+    
+    return stop_event, thread
+        
         

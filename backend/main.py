@@ -1,5 +1,6 @@
-from serial_reader import read_from_serial, port_selector
+from serial_reader import read_from_serial, port_selector, start_serial_thread
 from ring_buffer import RingBuffer
+from _outputdemo import show_metrics_menu
 
 def main():
     print("=== Lector de Datos del Sensor Meteorológico ===\n")
@@ -23,8 +24,41 @@ def main():
     if not port_sel:
         return
     
-    # Ejecutar el lector serial
-    read_from_serial(buffer_sensors, port_sel)
+    print("\n" + "="*60)
+    stop_event, thread = start_serial_thread(buffer_sensors, port_sel)
+    print("="*60)
+    print("Comandos disponibles:")
+    print("  'v' + Enter → Ver métricas acumuladas")
+    print("  'q' + Enter → Salir")
+    print("="*60 + "\n")
+
+    try:
+        while True:
+            cmd = input("Ingresa comando (v/q): ").strip().lower()
+            
+            if cmd == 'v':
+                # ← Obtener snapshot (thread-safe)
+                sensors_snapshot = buffer_sensors.snapshot()
+                
+                # ← Delegar menú a _outputdemo
+                show_metrics_menu(buffer_sensors, sensors_snapshot)
+
+            elif cmd == 'q':
+                print("\n✓ Saliendo...")
+                break
+            
+            else:
+                print("✗ Comando no válido.\n")
+
+    except KeyboardInterrupt:
+        print("\n\n✓ Interrumpido por usuario.")
+    
+    finally:
+        # Limpieza: detener thread
+        print("Deteniendo lector serial...")
+        stop_event.set()
+        thread.join(timeout=2)
+        print("✓ Programa finalizado.")
 
 if __name__ == "__main__":
     main()
