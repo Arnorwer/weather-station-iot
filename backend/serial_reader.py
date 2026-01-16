@@ -1,9 +1,7 @@
 import serial
 import serial.tools.list_ports
 import json
-import csv
 from datetime import datetime
-import os
 
 def port_selector():
     ports = list(serial.tools.list_ports.comports())
@@ -21,45 +19,8 @@ def port_selector():
                 return ports[idx].device
         print("Selección inválida. Intenta de nuevo.")
 
-def format_selector():
-    print("\n¿En qué formato deseas guardar los datos?")
-    print("  1. JSON")
-    print("  2. CSV")
-    print("  3. Ambos")
-    while True:
-        option = input("Selecciona (1/2/3): ").strip()
-        if option in ['1', '2', '3']:
-            return option
-        print("Opción inválida. Intenta de nuevo.")
-
-def json_save(data, file='data/sensor_data.json'):
-    os.makedirs(os.path.dirname(file), exist_ok=True)
-    if os.path.exists(file):
-        with open(file, 'r', encoding='utf-8') as f:
-            try:
-                records = json.load(f)
-            except json.JSONDecodeError:
-                records = []
-    else:
-        records = []
-    
-    records.append(data)
-    with open(file, 'w', encoding='utf-8') as f:
-        json.dump(records, f, indent=2, ensure_ascii=False)
-        
-def csv_save(data, file='data/sensor_data.csv'):
-    os.makedirs(os.path.dirname(file), exist_ok=True)
-    existe = os.path.exists(file)
-    with open(file, 'a', newline='', encoding='utf-8') as f:
-        fields = ['timestamp'] + [k for k in data.keys() if k != 'timestamp']
-        writer = csv.DictWriter(f, fieldnames=fields)
-        if not existe:
-            writer.writeheader()
-        
-        writer.writerow(data)
-
-def read_from_serial(buffer_sensors, port_sel, formato):
-    counter = 0
+def read_from_serial(buffer_sensors, port_sel):
+    #counter = 0
     try:
         with serial.Serial(port_sel, 9600, timeout=1) as ser:
             print(f"✓ Conectado a {port_sel}")
@@ -74,20 +35,15 @@ def read_from_serial(buffer_sensors, port_sel, formato):
                         
                         data_sensor = json.loads(line)
                         data_sensor['timestamp'] = datetime.now().isoformat()
-                        buffer_sensors.add_reading(data_sensor)
+                        buffer_sensors.append(data_sensor)
                         
                         # Mostrar en consola
-                        counter += 1
-                        print(f"[{counter}] {datetime.now().strftime('%H:%M:%S')}")
-                        for key, value in data_sensor.items():
-                            if key != 'timestamp':
-                                print(f"  {key}: {value}")
-                        print("-" * 60)
-                        
-                        if formato in ['1', '3']:
-                            json_save(data_sensor)
-                        if formato in ['2', '3']:
-                            csv_save(data_sensor)
+                        # counter += 1
+                        # print(f"[{counter}] {datetime.now().strftime('%H:%M:%S')}")
+                        # for key, value in data_sensor.items():
+                        #     if key != 'timestamp':
+                        #         print(f"  {key}: {value}")
+                        # print("-" * 60)
                         
                     except json.JSONDecodeError as e:
                         print(f"⚠ Error al parsear JSON: {e}")
@@ -99,5 +55,5 @@ def read_from_serial(buffer_sensors, port_sel, formato):
         print(f"✗ Error al abrir el puerto: {e}")
     except KeyboardInterrupt:
         print("\n\n✓ Lectura detenida por el usuario.")
-        print(f"Total de registros guardados: {counter}")
+        #print(f"Total de registros guardados: {counter}")
         

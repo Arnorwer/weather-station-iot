@@ -1,5 +1,5 @@
-from serial_reader import read_from_serial, port_selector, format_selector
-from ring_buffer import TwoDayStore
+from serial_reader import read_from_serial, port_selector
+from ring_buffer import RingBuffer
 
 def main():
     print("=== Lector de Datos del Sensor Meteorológico ===\n")
@@ -16,18 +16,15 @@ def main():
         return
     
     # Crear instancia del buffer
-    buffer_sensors = TwoDayStore(capacity_day=buffer_size)
+    buffer_sensors = RingBuffer(capacity=buffer_size)
 
     # Seleccionar y conectar al puerto serial
     port_sel = port_selector()
     if not port_sel:
         return
     
-    # Seleccionar formato de salida
-    formato = format_selector()
-    
     # Ejecutar el lector serial
-    read_from_serial(buffer_sensors, port_sel, formato)
+    read_from_serial(buffer_sensors, port_sel)
 
 if __name__ == "__main__":
     main()
