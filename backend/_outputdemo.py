@@ -2,7 +2,8 @@
 
 #read_from_serials(buffer_sensors, port_sel)
 
-#sensors = buffer_sensors.snapshot() 
+from graph_monitor import plot_metric
+
 def interactive_output(sensors, met, name, buffer_capacity=None):
     stats = []
     for m in sensors:
@@ -54,7 +55,9 @@ def show_metrics_menu(buffer_sensors, sensors_snapshot):
 
     if interaccion in metricas:
         metrica, nombre = metricas[interaccion]
-        interactive_output(sensors_snapshot, metrica, nombre, buffer_capacity=buffer_sensors._capacity)
+        stats = interactive_output(sensors_snapshot, metrica, nombre, buffer_capacity=buffer_sensors._capacity)
+        # ← DISPARA LA GRÁFICA EN TIEMPO REAL
+        plot_metric(buffer_sensors, metrica, nombre, stats)
     else:
         print("✗ Opción inválida.\n")
 
