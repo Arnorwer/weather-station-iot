@@ -41,7 +41,7 @@ class RealtimePlotter:
         """
         snapshot_actual = self.buffer.snapshot()
         
-        from _outputdemo import interactive_output
+        from metrics_processor import interactive_output
         stats_nuevos = interactive_output(snapshot_actual, self.metrica, self.nombre)
         
         if len(stats_nuevos) == 0:

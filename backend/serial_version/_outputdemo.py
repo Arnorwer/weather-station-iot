@@ -2,7 +2,7 @@
 
 #read_from_serials(buffer_sensors, port_sel)
 
-from graph_monitor import plot_metric
+from backend.serial_version.graph_monitor import plot_metric
 
 def interactive_output(sensors, met, name, buffer_capacity=None):
     stats = []

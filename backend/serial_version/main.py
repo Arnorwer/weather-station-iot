@@ -1,6 +1,6 @@
-from serial_reader import read_from_serial, port_selector, start_serial_thread
-from ring_buffer import RingBuffer
-from _outputdemo import show_metrics_menu
+from backend.serial_version.serial_reader import read_from_serial, port_selector, start_serial_thread
+from backend.serial_version.ring_buffer import RingBuffer
+from backend.serial_version._outputdemo import show_metrics_menu
 
 def main():
     print("=== Lector de Datos del Sensor Meteorológico ===\n")
